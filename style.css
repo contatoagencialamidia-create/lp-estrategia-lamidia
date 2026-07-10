@@ -1563,6 +1563,7 @@ p.p3 { font-size: var(--fs-p3); }
   text-align: left;
   font-family: var(--font-heading);
   font-size: var(--fs-h6);
+  color: var(--color-black-olive);
 }
 
 .faq__question > span:first-child {
