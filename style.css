@@ -1600,6 +1600,15 @@ p.p3 { font-size: var(--fs-p3); }
   color: var(--color-orange-cta);
 }
 
+/* Reforço contra o "format detection" automático do iOS/Android, que
+   transforma números (telefone, data etc.) em links azuis sublinhados
+   mesmo sem <a> no HTML original. */
+.faq__answer a,
+.faq__answer {
+  color: inherit !important;
+  text-decoration: none;
+}
+
 /* ==========================================================
    18. Rodapé — Contato final
    ========================================================== */
