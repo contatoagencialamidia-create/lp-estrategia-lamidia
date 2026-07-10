@@ -36,6 +36,8 @@ function initContatoForm() {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando...';
 
+    trackMetaLead(payload.email, payload.telefone);
+
     try {
       await fetch(WEBAPP_URL, {
         method: 'POST',
@@ -61,6 +63,46 @@ function initContatoForm() {
     status.hidden = true;
     status.textContent = '';
   }
+}
+
+function generateEventId() {
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+    return window.crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+async function sha256Hex(value) {
+  const data = new TextEncoder().encode(value);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function trackMetaLead(email, telefone) {
+  const eventId = generateEventId();
+
+  if (typeof fbq === 'function') {
+    fbq('track', 'Lead', {}, { eventID: eventId });
+  }
+
+  Promise.all([
+    sha256Hex(email.trim().toLowerCase()),
+    sha256Hex(telefone.replace(/\D/g, '')),
+  ])
+    .then(([emHash, phHash]) => {
+      fetch('/api/meta-capi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId,
+          eventSourceUrl: window.location.href,
+          userData: { em: [emHash], ph: [phHash] },
+        }),
+      }).catch(() => {});
+    })
+    .catch(() => {});
 }
 
 function fillUtmFields(form) {
